@@ -1,0 +1,260 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>콩콩 숫자놀이</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF6E3; --ink:#4a3428; --white:#fff;
+  --red:#FF6B6B; --orange:#FFA94D; --yellow:#FFD43B; --green:#69DB7C;
+  --blue:#4DABF7; --purple:#B197FC; --pink:#F783AC;
+  --shadow:0 1.2vmin 0 rgba(0,0,0,.13);
+}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:'Jua','Malgun Gothic','Apple SD Gothic Neo',sans-serif;touch-action:manipulation}
+button{font-family:inherit;color:inherit}
+.screen{position:fixed;inset:0;display:none}
+.screen.on{display:block}
+
+/* ---------- 홈 ---------- */
+#home{background:radial-gradient(circle at 20% 15%,#fff 0 6%,transparent 6.5%),
+  radial-gradient(circle at 80% 10%,#fff 0 4%,transparent 4.5%),linear-gradient(#FFE3B8,#FFF6E3 70%)}
+#home.on{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vmin;padding:calc(15vmin + env(safe-area-inset-top,0px)) 3vmin calc(6vmin + env(safe-area-inset-bottom,0px))}
+#home h1{margin:0;line-height:1;text-align:center;font-size:10vmin;font-weight:normal;letter-spacing:.5vmin;text-shadow:0 .8vmin 0 rgba(255,255,255,.9)}
+#home h1 span{display:inline-block;animation:bob 2s ease-in-out infinite}
+#home h1 span:nth-child(2n){animation-delay:.3s}
+@keyframes bob{50%{transform:translateY(-1.5vmin)}}
+.menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4vmin;width:min(94vw,140vmin)}
+@media (max-aspect-ratio:1/1){.menu{grid-template-columns:1fr;width:min(80vw,70vmin)}}
+.card{border:none;border-radius:6vmin;padding:2vmin;cursor:pointer;box-shadow:var(--shadow);font-size:6vmin;transition:transform .15s}
+.card:hover,.card:focus-visible{transform:translateY(-1vmin) rotate(-1.5deg) scale(1.04);outline:none}
+.card:active{transform:translateY(.6vmin);box-shadow:0 .4vmin 0 rgba(0,0,0,.13)}
+.card .em{display:block;font-size:12vmin;line-height:1.15}
+.card small{display:block;font-size:3.6vmin;opacity:.7;margin-top:.5vmin}
+.c1{background:var(--pink)} .c2{background:var(--yellow)} .c3{background:var(--green)}
+.corner{position:absolute;top:calc(3vmin + env(safe-area-inset-top,0px));right:calc(3vmin + env(safe-area-inset-right,0px));display:flex;gap:2vmin;z-index:60}
+.round{width:12vmin;height:12vmin;border-radius:50%;border:none;background:var(--white);font-size:6.5vmin;
+  cursor:pointer;box-shadow:0 .8vmin 0 rgba(0,0,0,.13);display:grid;place-items:center;padding:0}
+.round:active{transform:translateY(.5vmin)}
+.parent{position:absolute;bottom:1.5vmin;width:100%;text-align:center;font-size:2.4vmin;opacity:.55}
+
+/* ---------- 공통 ---------- */
+.topbar{position:absolute;top:calc(2.5vmin + env(safe-area-inset-top,0px));left:calc(2.5vmin + env(safe-area-inset-left,0px));right:calc(2.5vmin + env(safe-area-inset-right,0px));display:flex;align-items:center;gap:2vmin;z-index:60}
+.pill{margin-left:auto;background:var(--white);border-radius:8vmin;padding:1.2vmin 3.5vmin;font-size:6vmin;box-shadow:0 .8vmin 0 rgba(0,0,0,.13)}
+.hint{position:absolute;left:0;right:0;top:calc(17vmin + env(safe-area-inset-top,0px));padding:0 3vmin;text-align:center;font-size:5.5vmin;pointer-events:none;z-index:55;text-shadow:0 .5vmin 0 #fff}
+.field{position:absolute;left:4vmin;right:4vmin;top:calc(27vmin + env(safe-area-inset-top,0px));bottom:calc(30vmin + env(safe-area-inset-bottom,0px));
+  display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:2.5vmin}
+.item{font-size:13vmin;line-height:1;border:none;background:none;padding:0;cursor:pointer;position:relative;transition:transform .2s}
+.item:active{transform:scale(.9)}
+.item.done{transform:scale(1.15) rotate(-8deg);filter:drop-shadow(0 0 2vmin #fff)}
+.item b{position:absolute;left:50%;top:-1vmin;transform:translateX(-50%);font-size:6vmin;font-weight:normal;color:#fff;
+  background:var(--ink);border-radius:5vmin;padding:0 2vmin;animation:pop .3s}
+@keyframes pop{from{transform:translateX(-50%) scale(0)}}
+.big{position:absolute;left:0;right:0;bottom:calc(5vmin + env(safe-area-inset-bottom,0px));text-align:center;font-size:20vmin;line-height:1;text-shadow:0 1vmin 0 rgba(255,255,255,.9)}
+.choices{position:absolute;left:0;right:0;bottom:calc(5vmin + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:5vmin}
+.num{width:21vmin;height:21vmin;border:none;border-radius:6vmin;font-size:14vmin;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s}
+.num:active{transform:translateY(.6vmin)}
+.num.no{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-2vmin)}75%{transform:translateX(2vmin)}}
+
+#count{background:linear-gradient(#C8F2C2,#FFF6E3 80%)}
+#guess{background:linear-gradient(#FFE0EC,#FFF6E3 80%)}
+#press{background:linear-gradient(#D6EBFF,#FFF6E3 80%)}
+.pad{position:absolute;left:0;right:0;bottom:calc(3vmin + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,15vmin);justify-content:center;gap:2vmin}
+.pad .num{width:15vmin;height:12vmin;font-size:8vmin;border-radius:4vmin}
+#press .field{bottom:calc(34vmin + env(safe-area-inset-bottom,0px))}
+#pressBig{position:absolute;left:0;right:0;top:calc(14vmin + env(safe-area-inset-top,0px));text-align:center;font-size:14vmin;line-height:1;text-shadow:0 1vmin 0 #fff}
+
+.spark{position:fixed;pointer-events:none;font-size:7vmin;z-index:90;transition:transform 1s ease-out,opacity 1s}
+#yay{position:fixed;inset:0;display:none;place-items:center;z-index:80;font-size:11vmin;text-align:center;background:rgba(255,246,227,.6);pointer-events:none}
+#yay.on{display:grid;animation:pop2 .4s}
+@keyframes pop2{from{transform:scale(.5);opacity:0}}
+/* ---------- 폰 세로 화면 ---------- */
+@media (max-aspect-ratio:3/4){
+  #home.on{gap:5vh}
+  #home h1{font-size:13vw}
+  .menu{width:86vw;gap:3.5vh}
+  .card{font-size:8vw;border-radius:7vw;padding:2.5vh 3vw}
+  .card .em{font-size:16vw}
+  .card small{font-size:4.5vw}
+  .round{width:14vw;height:14vw;font-size:7.5vw}
+  .parent{font-size:3.4vw;padding:0 5vw;bottom:2vh}
+  .pill{font-size:7vw}
+  .hint{font-size:6.5vw;top:calc(19vw + env(safe-area-inset-top,0px))}
+  .field{top:calc(32vw + env(safe-area-inset-top,0px));bottom:calc(30vw + 6vh + env(safe-area-inset-bottom,0px));gap:3vw}
+  .item{font-size:17vw}
+  .item b{font-size:7vw}
+  .big{font-size:26vw;bottom:calc(5vh + env(safe-area-inset-bottom,0px))}
+  .choices{gap:5vw;bottom:calc(6vh + env(safe-area-inset-bottom,0px))}
+  .num{width:24vw;height:24vw;font-size:15vw;border-radius:7vw}
+  .pad{grid-template-columns:repeat(5,17vw);gap:2vw;bottom:calc(4vh + env(safe-area-inset-bottom,0px))}
+  .pad .num{width:17vw;height:15vw;font-size:9vw;border-radius:4.5vw}
+  #press .field{bottom:calc(36vw + 6vh + env(safe-area-inset-bottom,0px))}
+  #pressBig{font-size:16vw;top:calc(20vw + env(safe-area-inset-top,0px))}
+  #yay{font-size:12vw}
+}
+</style>
+
+<!-- 홈 -->
+<div class="screen on" id="home">
+  <div class="corner"><button class="round" id="soundBtn" aria-label="소리">🔊</button></div>
+  <h1><span>콩</span><span>콩</span> <span>숫</span><span>자</span><span>놀</span><span>이</span></h1>
+  <div class="menu">
+    <button class="card c3" data-go="count"><span class="em">🍎</span>하나씩 세기<small>눌러서 세어요</small></button>
+    <button class="card c1" data-go="guess"><span class="em">🐥</span>몇 마리?<small>숫자를 골라요</small></button>
+    <button class="card c2" data-go="press"><span class="em">🔢</span>숫자 누르기<small>키보드 숫자</small></button>
+  </div>
+  <div class="parent">부모님께: 숫자 1~10을 소리와 그림으로 익혀요. 키보드 숫자키도 돼요.</div>
+</div>
+
+<!-- 하나씩 세기 -->
+<div class="screen" id="count">
+  <div class="topbar"><button class="round home" aria-label="집으로">🏠</button><div class="pill">⭐ <span class="score">0</span></div></div>
+  <div class="hint">하나씩 눌러서 세어 봐요!</div>
+  <div class="field" id="countField"></div>
+  <div class="big" id="countBig"></div>
+</div>
+
+<!-- 몇 마리? -->
+<div class="screen" id="guess">
+  <div class="topbar"><button class="round home" aria-label="집으로">🏠</button><div class="pill">⭐ <span class="score">0</span></div></div>
+  <div class="hint" id="guessHint">몇 마리일까요?</div>
+  <div class="field" id="guessField"></div>
+  <div class="choices" id="choices"></div>
+</div>
+
+<!-- 숫자 누르기 -->
+<div class="screen" id="press">
+  <div class="topbar"><button class="round home" aria-label="집으로">🏠</button></div>
+  <div id="pressBig">숫자를 눌러요</div>
+  <div class="field" id="pressField"></div>
+  <div class="pad" id="pad"></div>
+</div>
+
+<div id="yay"></div>
+
+<script>
+const KOR=['','하나','둘','셋','넷','다섯','여섯','일곱','여덟','아홉','열'];
+const NUMKOR=['영','일','이','삼','사','오','육','칠','팔','구','십'];
+const THINGS=['🍎','🍓','🐥','🐟','🌟','🎈','🍩','🐞','🌸','🚗','🍌','🐶'];
+const COLORS=['var(--red)','var(--orange)','var(--yellow)','var(--green)','var(--blue)','var(--purple)','var(--pink)'];
+let soundOn=true, score=0, AC=null, cur='home';
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const rand=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+
+/* ---- 소리 ---- */
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){} } if(AC&&AC.state==='suspended')AC.resume(); return AC; }
+function tone(f,dur=.15,type='sine',vol=.25,delay=0){
+  if(!soundOn)return; const c=ac(); if(!c)return; const t=c.currentTime+delay;
+  const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur);
+}
+function chime(){ [523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.18,i*.1)); }
+function boop(){ tone(220,.2,'square',.08); }
+function say(text){
+  if(!soundOn||!('speechSynthesis' in window))return;
+  speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='ko-KR'; u.rate=.9; u.pitch=1.2;
+  const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith('ko')); if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+if('speechSynthesis' in window)speechSynthesis.getVoices();
+
+/* ---- 효과 ---- */
+function burst(x,y,items=['⭐','✨','🎉'],n=10){
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='spark'; s.textContent=pick(items);
+    s.style.left=x+'px'; s.style.top=y+'px'; document.body.appendChild(s);
+    const a=Math.random()*Math.PI*2, d=60+Math.random()*140;
+    requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) rotate(${rand(-90,90)}deg)`;s.style.opacity=0});
+    setTimeout(()=>s.remove(),1000);
+  }
+}
+function celebrate(msg){
+  const y=document.getElementById('yay'); y.textContent=msg; y.classList.add('on'); chime();
+  burst(innerWidth/2,innerHeight/2,['⭐','🌟','🎉','💖'],18);
+  setTimeout(()=>y.classList.remove('on'),1300);
+}
+function addScore(){ score++; document.querySelectorAll('.score').forEach(s=>s.textContent=score); }
+
+/* ---- 화면 이동 ---- */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id)); cur=id;
+  if(id==='count')countRound(); if(id==='guess')guessRound(); if(id==='press')pressReset();
+  if(id==='home')say('콩콩 숫자놀이');
+}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ac();tone(660,.1);go(b.dataset.go)});
+document.querySelectorAll('.home').forEach(b=>b.onclick=()=>{tone(440,.1);go('home')});
+document.getElementById('soundBtn').onclick=e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'🔊':'🔇';if(soundOn){tone(660,.12);say('소리 켰어요')}else if(window.speechSynthesis)speechSynthesis.cancel()};
+
+/* ---- 1. 하나씩 세기 ---- */
+let cN=0,cDone=0,cBusy=false;
+function countRound(){
+  cN=rand(1,score<5?5:10); cDone=0; cBusy=false;
+  const f=document.getElementById('countField'), t=pick(THINGS); f.innerHTML='';
+  document.getElementById('countBig').textContent='';
+  for(let i=0;i<cN;i++){
+    const b=document.createElement('button'); b.className='item'; b.textContent=t;
+    b.onclick=()=>{
+      if(b.classList.contains('done')||cBusy)return;
+      cDone++; b.classList.add('done'); b.insertAdjacentHTML('beforeend',`<b>${cDone}</b>`);
+      tone(440+cDone*60,.15,'triangle',.2); say(KOR[cDone]);
+      document.getElementById('countBig').textContent=cDone;
+      if(cDone===cN){ cBusy=true; addScore();
+        setTimeout(()=>{say(`모두 ${KOR[cN]}! 참 잘했어요`);celebrate(`모두 ${cN}개! 🌟`)},700);
+        setTimeout(countRound,2600);
+      }
+    };
+    f.appendChild(b);
+  }
+}
+
+/* ---- 2. 몇 마리? ---- */
+let gN=0,gBusy=false;
+function guessRound(){
+  gBusy=false; const max=score<5?5:10; gN=rand(1,max); const t=pick(THINGS);
+  document.getElementById('guessField').innerHTML=Array(gN).fill(`<span class="item">${t}</span>`).join('');
+  const opts=new Set([gN]); while(opts.size<3)opts.add(rand(1,max));
+  const ch=document.getElementById('choices'); ch.innerHTML='';
+  [...opts].sort(()=>Math.random()-.5).forEach((n,i)=>{
+    const b=document.createElement('button'); b.className='num'; b.textContent=n; b.style.background=COLORS[(i*2+gN)%COLORS.length];
+    b.onclick=()=>answer(n,b); ch.appendChild(b);
+  });
+  document.getElementById('guessHint').textContent='몇 개일까요?';
+  setTimeout(()=>{if(cur==='guess')say('몇 개일까요?')},300);
+}
+function answer(n,b){
+  if(gBusy)return;
+  if(n===gN){ gBusy=true; addScore(); say(`맞아요! ${KOR[gN]}`); celebrate(`${gN} 맞아요! 🎉`);
+    const r=b.getBoundingClientRect(); burst(r.left+r.width/2,r.top);
+    setTimeout(guessRound,2200);
+  }else{ boop(); b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); say('다시 세어 볼까?');
+    document.getElementById('guessHint').textContent='손가락으로 하나씩 세어 봐요 ☝️'; }
+}
+
+/* ---- 3. 숫자 누르기 ---- */
+function pressReset(){ document.getElementById('pressField').innerHTML=''; document.getElementById('pressBig').textContent='숫자를 눌러요'; }
+let pressId=0;
+function pressNum(n){
+  const id=++pressId, t=pick(THINGS), f=document.getElementById('pressField');
+  document.getElementById('pressBig').textContent=n===0?'0 (영)':`${n} (${KOR[n]})`;
+  f.innerHTML='';
+  for(let i=0;i<n;i++)setTimeout(()=>{if(id!==pressId)return;f.insertAdjacentHTML('beforeend',`<span class="item">${t}</span>`);tone(500+i*50,.08,'triangle',.15)},i*120);
+  say(n===0?'영, 하나도 없어요':`${NUMKOR[n]}, ${KOR[n]}`);
+}
+(function(){
+  const pad=document.getElementById('pad');
+  [1,2,3,4,5,6,7,8,9,10].forEach((n,i)=>{
+    const b=document.createElement('button'); b.className='num'; b.textContent=n; b.style.background=COLORS[i%COLORS.length];
+    b.onclick=()=>pressNum(n); pad.appendChild(b);
+  });
+})();
+
+/* ---- 키보드 ---- */
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){go('home');return}
+  if(!/^[0-9]$/.test(e.key))return; let n=+e.key;
+  if(cur==='press'){ pressNum(n===0?10:n); }
+  else if(cur==='guess'){ const b=[...document.querySelectorAll('#choices .num')].find(b=>+b.textContent===(n===0?10:n)); if(b)answer(+b.textContent,b); else boop(); }
+  else if(cur==='home'){ ac(); go('press'); pressNum(n===0?10:n); }
+});
+</script>
