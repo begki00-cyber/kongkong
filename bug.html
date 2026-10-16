@@ -1,0 +1,146 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>콩콩 벌레잡기</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#4a3428;--white:#fff;--shadow:0 1.2vmin 0 rgba(0,0,0,.13)}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);touch-action:manipulation;
+  font-family:'Jua','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:linear-gradient(#BDE6FF 0 35%,#B7E4A0 35% 100%)}
+button{font-family:inherit;color:inherit}
+#garden{position:fixed;inset:0;overflow:hidden}
+.flower{position:absolute;font-size:9vmin;pointer-events:none;opacity:.9}
+.bug{position:absolute;left:0;top:0;width:15vmin;height:15vmin;border:none;background:none;padding:0;cursor:pointer;
+  font-size:12vmin;line-height:15vmin;text-align:center;will-change:transform}
+.bug.caught{transition:transform .7s cubic-bezier(.5,-0.3,.7,1),opacity .7s;opacity:.2;pointer-events:none}
+.topbar{position:fixed;top:calc(2.5vmin + env(safe-area-inset-top,0px));left:calc(2.5vmin + env(safe-area-inset-left,0px));right:calc(2.5vmin + env(safe-area-inset-right,0px));display:flex;align-items:center;gap:2vmin;z-index:60}
+.round{width:12vmin;height:12vmin;border-radius:50%;border:none;background:var(--white);font-size:6.5vmin;cursor:pointer;box-shadow:0 .8vmin 0 rgba(0,0,0,.13);display:grid;place-items:center;padding:0}
+.round:active{transform:translateY(.5vmin)}
+#jar{margin-left:auto;display:flex;align-items:center;gap:1.5vmin;background:rgba(255,255,255,.85);border-radius:8vmin;padding:1vmin 3.5vmin;font-size:6vmin;box-shadow:0 .8vmin 0 rgba(0,0,0,.13)}
+#jar .ic{font-size:8vmin}
+#jar.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.15)}}
+.hint{position:fixed;left:0;right:0;top:calc(17vmin + env(safe-area-inset-top,0px));text-align:center;font-size:6vmin;pointer-events:none;z-index:55;text-shadow:0 .5vmin 0 #fff;transition:opacity .6s}
+#start{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5vmin;background:rgba(255,246,227,.88)}
+#start h1{margin:0;font-size:12vmin;font-weight:normal;text-shadow:0 .8vmin 0 #fff}
+#start .bugs{font-size:14vmin;animation:wig 1s ease-in-out infinite}
+@keyframes wig{50%{transform:rotate(-8deg) translateY(-1vmin)}}
+.go{border:none;border-radius:8vmin;padding:2.5vmin 9vmin;font-size:8vmin;background:#69DB7C;cursor:pointer;box-shadow:var(--shadow)}
+.go:active{transform:translateY(.6vmin)}
+#start small{font-size:3.6vmin;opacity:.65;text-align:center;padding:0 4vmin}
+.spark{position:fixed;pointer-events:none;font-size:7vmin;z-index:90;transition:transform .9s ease-out,opacity .9s}
+#yay{position:fixed;inset:0;display:none;place-items:center;z-index:85;font-size:11vmin;text-align:center;background:rgba(255,246,227,.6);pointer-events:none}
+#yay.on{display:grid;animation:pop .4s}
+@keyframes pop{from{transform:scale(.5);opacity:0}}
+@media (max-aspect-ratio:3/4){
+  .bug{width:20vw;height:20vw;font-size:15vw;line-height:20vw}
+  .round{width:14vw;height:14vw;font-size:7.5vw}
+  #jar{font-size:7vw} #jar .ic{font-size:9vw}
+  .hint{font-size:6.5vw;top:calc(20vw + env(safe-area-inset-top,0px))}
+  #start h1{font-size:13vw} #start .bugs{font-size:16vw} .go{font-size:9vw} #start small{font-size:4vw}
+}
+</style>
+
+<div id="garden"></div>
+<div class="topbar">
+  <button class="round" id="soundBtn" aria-label="소리">🔊</button>
+  <div id="jar"><span class="ic">🧺</span><span id="cnt">0</span></div>
+</div>
+<div class="hint" id="hint">벌레를 톡! 눌러서 잡아요</div>
+<div id="start">
+  <div class="bugs">🐞🐛🦋</div>
+  <h1>콩콩 벌레잡기</h1>
+  <button class="go" id="goBtn">시작! ▶</button>
+  <small>부모님께: 움직이는 벌레를 눌러 유리병에 모아요. 10마리마다 칭찬해요. 벌레는 다치지 않고 병에 쏙 들어가요.</small>
+</div>
+<div id="yay"></div>
+
+<script>
+const BUGS=['🐞','🐛','🦋','🐜','🐝','🦗','🐌'];
+const NAMES={'🐞':'무당벌레','🐛':'애벌레','🦋':'나비','🐜':'개미','🐝':'꿀벌','🦗':'메뚜기','🐌':'달팽이'};
+const KOR=['','하나','둘','셋','넷','다섯','여섯','일곱','여덟','아홉','열'];
+const garden=document.getElementById('garden'), cntEl=document.getElementById('cnt'), jar=document.getElementById('jar');
+let soundOn=true, AC=null, count=0, bugs=[], playing=false, last=0;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const vm=()=>Math.min(innerWidth,innerHeight)/100;
+
+/* ---- 소리 ---- */
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){} } if(AC&&AC.state==='suspended')AC.resume(); return AC; }
+function tone(f,dur=.15,type='sine',vol=.22,delay=0,slide=0){
+  if(!soundOn)return; const c=ac(); if(!c)return; const t=c.currentTime+delay;
+  const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.setValueAtTime(f,t); if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur);
+}
+function catchSound(){ tone(500,.18,'triangle',.22,0,1100); tone(1300,.1,'sine',.12,.12); }
+function chime(){ [523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.18,i*.1)); }
+function say(text){
+  if(!soundOn||!('speechSynthesis' in window))return;
+  speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='ko-KR'; u.rate=.95; u.pitch=1.2;
+  const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith('ko')); if(v)u.voice=v; speechSynthesis.speak(u);
+}
+if('speechSynthesis' in window)speechSynthesis.getVoices();
+document.getElementById('soundBtn').onclick=e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'🔊':'🔇';if(soundOn)tone(660,.12);else if(window.speechSynthesis)speechSynthesis.cancel()};
+
+/* ---- 꽃밭 ---- */
+for(let i=0;i<9;i++){const f=document.createElement('div');f.className='flower';f.textContent=pick(['🌼','🌷','🌸','🍀','🌻','🌿']);
+  f.style.left=(5+Math.random()*85)+'%';f.style.top=(40+Math.random()*52)+'%';garden.appendChild(f);}
+
+/* ---- 효과 ---- */
+function burst(x,y,items=['✨','⭐','💖'],n=8){
+  for(let i=0;i<n;i++){const s=document.createElement('div');s.className='spark';s.textContent=pick(items);
+    s.style.left=x+'px';s.style.top=y+'px';document.body.appendChild(s);
+    const a=Math.random()*Math.PI*2,d=50+Math.random()*110;
+    requestAnimationFrame(()=>{s.style.transform=`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`;s.style.opacity=0});
+    setTimeout(()=>s.remove(),900);}
+}
+function celebrate(msg){const y=document.getElementById('yay');y.textContent=msg;y.classList.add('on');chime();
+  burst(innerWidth/2,innerHeight/2,['⭐','🌟','🎉','💖'],18);setTimeout(()=>y.classList.remove('on'),1400);}
+
+/* ---- 벌레 ---- */
+function maxBugs(){ return count<10?3:count<30?4:5; }
+function speed(){ return (count<10?9:count<30?13:17)*vm(); }  // 초당 이동 거리
+function spawn(){
+  const b=document.createElement('button'); b.className='bug'; const e=pick(BUGS); b.textContent=e; b.setAttribute('aria-label',NAMES[e]);
+  const s=b.offsetWidth||15*vm(); garden.appendChild(b);
+  const o={el:b,e,x:Math.random()*(innerWidth-s*1.2),y:innerHeight*.38+Math.random()*(innerHeight*.55-s),a:Math.random()*Math.PI*2,turn:0,t:Math.random()*10,alive:true};
+  b.addEventListener('pointerdown',ev=>{ev.preventDefault();grab(o)});
+  bugs.push(o); place(o);
+}
+function place(o){
+  const flip=Math.cos(o.a)<0?-1:1, wob=Math.sin(o.t*8)*6;
+  o.el.style.transform=`translate(${o.x}px,${o.y}px) scaleX(${flip}) rotate(${wob}deg)`;
+}
+function grab(o){
+  if(!o.alive||!playing)return; o.alive=false; ac(); catchSound();
+  const r=o.el.getBoundingClientRect(); burst(r.left+r.width/2,r.top+r.height/2);
+  const j=jar.getBoundingClientRect();
+  o.el.classList.add('caught');
+  o.el.style.transform=`translate(${j.left+j.width*.2}px,${j.top}px) scale(.3)`;
+  setTimeout(()=>{o.el.remove();bugs=bugs.filter(b=>b!==o)},700);
+  setTimeout(()=>{count++;cntEl.textContent=count;jar.classList.remove('bump');void jar.offsetWidth;jar.classList.add('bump');
+    if(count%10===0){say(`우와! ${count}마리 잡았어요!`);celebrate(`${count}마리! 🎉`)}
+    else if(count<=10)say(KOR[count]); else say(NAMES[o.e]);
+  },650);
+  document.getElementById('hint').style.opacity=0;
+}
+function loop(t){
+  const dt=Math.min(.05,(t-last)/1000||0); last=t;
+  if(playing){
+    const s=bugs[0]?bugs[0].el.offsetWidth:15*vm(), sp=speed(), top=innerHeight*.36, bottom=innerHeight-s, right=innerWidth-s;
+    for(const o of bugs){ if(!o.alive)continue;
+      o.t+=dt; if(Math.random()<dt*.8)o.turn=(Math.random()-.5)*3;
+      o.a+=o.turn*dt; const v=o.e==='🐌'?sp*.45:o.e==='🦋'||o.e==='🐝'?sp*1.2:sp;
+      o.x+=Math.cos(o.a)*v*dt; o.y+=Math.sin(o.a)*v*dt;
+      if(o.x<0){o.x=0;o.a=Math.PI-o.a} if(o.x>right){o.x=right;o.a=Math.PI-o.a}
+      if(o.y<top){o.y=top;o.a=-o.a} if(o.y>bottom){o.y=bottom;o.a=-o.a}
+      place(o);
+    }
+    if(bugs.filter(b=>b.alive).length<maxBugs())spawn();
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+document.getElementById('goBtn').onclick=()=>{ac();tone(660,.1);document.getElementById('start').style.display='none';playing=true;say('벌레를 잡아 볼까요?')};
+addEventListener('keydown',e=>{ if(!playing&&(e.key==='Enter'||e.key===' '))document.getElementById('goBtn').click(); });
+</script>
