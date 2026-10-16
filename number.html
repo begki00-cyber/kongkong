@@ -71,12 +71,12 @@ button{font-family:inherit;color:inherit}
 @keyframes pop2{from{transform:scale(.5);opacity:0}}
 /* ---------- 폰 세로 화면 ---------- */
 @media (max-aspect-ratio:3/4){
-  #home.on{gap:5vh}
-  #home h1{font-size:13vw}
+  #home.on{gap:5vh;padding-top:calc(min(15vmin,10vh) + env(safe-area-inset-top,0px))}
+  #home h1{font-size:min(13vw,6.5vh)}
   .menu{width:86vw;gap:3.5vh}
-  .card{font-size:8vw;border-radius:7vw;padding:2.5vh 3vw}
-  .card .em{font-size:16vw}
-  .card small{font-size:4.5vw}
+  .card{font-size:min(8vw,4vh);border-radius:7vw;padding:2vh 3vw}
+  .card .em{font-size:min(16vw,7.5vh)}
+  .card small{font-size:min(4.5vw,2.2vh)}
   .round{width:14vw;height:14vw;font-size:7.5vw}
   .parent{font-size:3.4vw;padding:0 5vw;bottom:2vh}
   .pill{font-size:7vw}
