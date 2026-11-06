@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>콩콩 디자인놀이</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;user-select:none;-webkit-user-select:none}
+body{font-family:'Jua','Malgun Gothic',sans-serif;color:#4a3428;background:linear-gradient(#FFE8F0,#E8F4FF 80%)}
+button{font-family:inherit;color:inherit}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;padding:12px 14px 18px;gap:10px}
+.screen.on{display:flex}
+/* ---------- 홈 ---------- */
+h1{margin:4vh 0 1vh;font-size:clamp(34px,8vw,64px);font-weight:normal}
+h1 span{display:inline-block;animation:bob 2s ease-in-out infinite}
+h1 span:nth-child(2n){animation-delay:.3s;color:#E64980}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.cards{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;width:min(100%,900px)}
+.card{flex:1 1 230px;max-width:280px;border:none;border-radius:28px;padding:22px 12px;font-size:clamp(24px,5vw,32px);box-shadow:0 8px 0 rgba(0,0,0,.13);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
+.card:active{transform:translateY(5px);box-shadow:0 3px 0 rgba(0,0,0,.13)}
+.card .em{font-size:1.9em}.card small{font-size:.6em;opacity:.75}
+.c1{background:#FFD43B}.c2{background:#B197FC}.c3{background:#8CE99A}
+.parent{margin-top:auto;font-size:14px;opacity:.7;text-align:center;max-width:640px}
+/* ---------- 공통 ---------- */
+.topbar{width:100%;display:flex;justify-content:space-between;align-items:center}
+.round{width:54px;height:54px;border:none;border-radius:50%;background:#fff;font-size:26px;box-shadow:0 4px 0 rgba(0,0,0,.12);cursor:pointer}
+.pill{background:#fff;border-radius:30px;padding:8px 18px;font-size:24px;box-shadow:0 4px 0 rgba(0,0,0,.1)}
+.hint{font-size:clamp(20px,5vw,30px);text-align:center;min-height:1.3em}
+.big{border:none;border-radius:24px;background:#FF8787;color:#fff;font-size:clamp(22px,5vw,30px);padding:12px 28px;box-shadow:0 6px 0 rgba(0,0,0,.15);cursor:pointer}
+.no{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#yay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s;z-index:20}
+#yay.on{opacity:1}
+#yay div{background:#fff;border-radius:30px;padding:20px 36px;font-size:clamp(30px,7vw,52px);box-shadow:0 10px 0 rgba(0,0,0,.12)}
+.fx{position:fixed;pointer-events:none;font-size:34px;z-index:30}
+/* ---------- 무늬 잇기 ---------- */
+#seq{display:flex;flex-wrap:wrap;gap:1.6vmin;justify-content:center;align-items:center;margin-top:2vh;background:#fff;border-radius:28px;padding:2.5vmin 3vmin;box-shadow:0 6px 0 rgba(0,0,0,.08)}
+#seq svg,#opts svg{width:min(11vmin,64px);height:min(11vmin,64px)}
+#seq .q{width:min(11vmin,64px);height:min(11vmin,64px);border:4px dashed #E64980;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:min(8vmin,44px);color:#E64980}
+#opts{display:flex;gap:4vmin;margin-top:3vh}
+#opts button{border:none;background:#fff;border-radius:26px;padding:3vmin;box-shadow:0 6px 0 rgba(0,0,0,.12);cursor:pointer}
+#opts svg{width:min(16vmin,90px);height:min(16vmin,90px)}
+/* ---------- 반쪽 칠하기 ---------- */
+#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;width:min(92vw,52vh,440px);aspect-ratio:6/5;background:#fff;padding:6px;border-radius:20px;box-shadow:0 6px 0 rgba(0,0,0,.08);position:relative}
+#grid i{border-radius:8px;background:#F1F3F5}
+#grid i.r{background:#fff;border:3px dashed #CED4DA;cursor:pointer}
+#grid i:nth-child(6n+4){margin-left:6px}
+#grid::after{content:'';position:absolute;top:4px;bottom:4px;left:50%;border-left:4px dotted #E64980}
+.pal{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.pal button{width:52px;height:52px;border-radius:50%;border:5px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.15);cursor:pointer;font-size:22px}
+.pal button.sel{transform:scale(1.2);border-color:#4a3428}
+/* ---------- 색 꾸미기 ---------- */
+#pic{flex:1;min-height:0;width:min(100%,640px)}
+#pic [data-r]{cursor:pointer;stroke:#4a3428;stroke-width:3;stroke-linejoin:round;transition:fill .25s}
+.sets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.sets button{border:none;border-radius:20px;padding:6px 14px;font-size:20px;background:#fff;box-shadow:0 3px 0 rgba(0,0,0,.12);cursor:pointer}
+.sets button.sel{background:#4a3428;color:#fff}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+@media (max-height:560px){h1{margin-top:1vh}.card{padding:12px}}
+</style>
+
+<!-- 홈 -->
+<section class="screen on" id="home">
+  <div class="topbar"><button class="round" id="soundBtn" aria-label="소리">🔊</button><span></span></div>
+  <h1><span>콩</span><span>콩</span> <span>디</span><span>자</span><span>인</span><span>놀</span><span>이</span></h1>
+  <div class="cards">
+    <button class="card c1" data-go="pat"><span class="em">🔴🔺</span>무늬 잇기<small>다음엔 뭐가 올까?</small></button>
+    <button class="card c2" data-go="sym"><span class="em">🦋</span>반쪽 칠하기<small>거울처럼 똑같이</small></button>
+    <button class="card c3" data-go="col"><span class="em">🎨</span>색 꾸미기<small>어울리는 색 고르기</small></button>
+  </div>
+  <div class="parent">부모님께: 무늬 잇기는 반복 규칙(패턴), 반쪽 칠하기는 대칭, 색 꾸미기는 서로 어울리는 색 묶음(팔레트)을 몸으로 익혀요. 색 꾸미기는 정답이 없어요. "왜 이 색을 골랐어?" 하고 물어봐 주세요.</div>
+</section>
+
+<!-- 무늬 잇기 -->
+<section class="screen" id="pat">
+  <div class="topbar"><button class="round home" aria-label="처음으로">🏠</button><div class="pill">⭐ <b class="score">0</b></div></div>
+  <div class="hint" id="patHint">다음엔 뭐가 올까요?</div>
+  <div id="seq"></div>
+  <div id="opts"></div>
+</section>
+
+<!-- 반쪽 칠하기 -->
+<section class="screen" id="sym">
+  <div class="topbar"><button class="round home" aria-label="처음으로">🏠</button><div class="pill">⭐ <b class="score">0</b></div></div>
+  <div class="hint">왼쪽이랑 똑같이, 오른쪽을 칠해요</div>
+  <div id="grid"></div>
+  <div class="pal" id="symPal"></div>
+</section>
+
+<!-- 색 꾸미기 -->
+<section class="screen" id="col">
+  <div class="topbar"><button class="round home" aria-label="처음으로">🏠</button><button class="round" id="picBtn" aria-label="다른 그림">🔄</button></div>
+  <div class="sets" id="sets"></div>
+  <svg id="pic" viewBox="0 0 400 300"></svg>
+  <div class="row"><div class="pal" id="colPal"></div><button class="big" id="doneBtn">완성! ✨</button></div>
+</section>
+
+<div id="yay"><div>참 잘했어요! 🌟</div></div>
+
+<script>
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let score=0, soundOn=true, cur='home';
+
+/* ---- 소리 ---- */
+let AC=null; function ac(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(AC&&AC.state==='suspended')AC.resume(); return AC; }
+function tone(f,d=.15,type='sine',v=.2,when=0){ if(!soundOn)return; const a=ac(); if(!a)return;
+  const o=a.createOscillator(), g=a.createGain(), t=a.currentTime+when; o.type=type; o.frequency.value=f;
+  g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+d); o.connect(g).connect(a.destination); o.start(t); o.stop(t+d); }
+function chime(){ [523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.18,i*.1)); }
+function boop(){ tone(220,.2,'square',.08); }
+function say(text){ if(!soundOn||!('speechSynthesis' in window))return;
+  speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='ko-KR'; u.rate=.9; u.pitch=1.25;
+  const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith('ko')); if(v)u.voice=v; speechSynthesis.speak(u); }
+document.getElementById('soundBtn').onclick=e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'🔊':'🔇';if(soundOn){tone(660,.12);say('소리 켰어요')}else if(window.speechSynthesis)speechSynthesis.cancel()};
+
+/* ---- 효과 ---- */
+function burst(x,y,items=['✨','⭐','💖'],n=10){
+  for(let i=0;i<n;i++){const f=document.createElement('div');f.className='fx';f.textContent=pick(items);f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);
+    const a=Math.random()*Math.PI*2,r=80+Math.random()*120;
+    f.animate([{transform:'translate(-50%,-50%) scale(.5)',opacity:1},{transform:`translate(${Math.cos(a)*r-17}px,${Math.sin(a)*r-17}px) scale(1.2)`,opacity:0}],{duration:900,easing:'ease-out'}).onfinish=()=>f.remove();}
+}
+function celebrate(msg){ chime(); const y=document.getElementById('yay'); y.firstElementChild.textContent=msg; y.classList.add('on');
+  burst(innerWidth/2,innerHeight/2,['⭐','🌟','🎉','💖','🎨'],18); setTimeout(()=>y.classList.remove('on'),1400); }
+function addScore(){ score++; document.querySelectorAll('.score').forEach(s=>s.textContent=score); }
+
+/* ---- 화면 이동 ---- */
+const enter={};
+function go(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id)); cur=id; if(enter[id])enter[id](); if(id==='home')say('콩콩 디자인놀이'); }
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ac();tone(660,.1);go(b.dataset.go)});
+document.querySelectorAll('.home').forEach(b=>b.onclick=()=>{tone(440,.1);go('home')});
+
+/* ---- 모양 ---- */
+function shapeSVG(t,c,size=100){
+  const s={circle:`<circle cx="50" cy="50" r="40"/>`,square:`<rect x="12" y="12" width="76" height="76" rx="10"/>`,
+    tri:`<polygon points="50,10 92,88 8,88" stroke-linejoin="round"/>`,heart:`<path d="M50 88C20 66 8 50 8 33 8 19 19 9 32 9c8 0 14 4 18 11 4-7 10-11 18-11 13 0 24 10 24 24 0 17-12 33-42 55z"/>`,
+    star:`<polygon points="50,6 61,38 95,38 67,58 78,92 50,71 22,92 33,58 5,38 39,38" stroke-linejoin="round"/>`}[t];
+  return `<svg viewBox="0 0 100 100"><g fill="${c}" stroke="rgba(0,0,0,.18)" stroke-width="4">${s}</g></svg>`;
+}
+const PCOL={빨강:'#FF6B6B',노랑:'#FFD43B',파랑:'#4DABF7',초록:'#51CF66',보라:'#9775FA',주황:'#FF922B'};
+const PSHP={circle:'동그라미',square:'네모',tri:'세모',heart:'하트',star:'별'};
+
+/* ===== 1. 무늬 잇기 ===== */
+(()=>{
+  const seq=document.getElementById('seq'), opts=document.getElementById('opts'), hint=document.getElementById('patHint');
+  let answer, busy=false;
+  const RULES=[[0,1],[0,1],[0,0,1],[0,1,1],[0,1,2],[0,0,1,1],[0,1,2]];
+  function item(lv){ // 쉬움: 같은 모양 다른 색 → 어려움: 모양·색 모두 다름
+    const names=shuffle(Object.keys(PCOL)), shapes=shuffle(Object.keys(PSHP));
+    return [0,1,2].map(i=>({t:lv<3?shapes[0]:shapes[i],c:PCOL[names[i]],n:lv<3?names[i]:names[i]+' '+PSHP[shapes[i]]}));
+  }
+  function round(){
+    busy=false; const lv=score; const rule=pick(lv<3?RULES.slice(0,2):lv<6?RULES.slice(0,4):RULES);
+    const its=item(lv), len=rule.length*2+ (rule.length<3?2:1);
+    const full=[]; for(let i=0;i<=len;i++)full.push(rule[i%rule.length]);
+    answer=full[len]; seq.innerHTML=full.slice(0,len).map(k=>shapeSVG(its[k].t,its[k].c)).join('')+'<div class="q">?</div>';
+    const kinds=[...new Set(rule)]; const choices=shuffle(kinds.length<3?[...kinds,2].slice(0,3):kinds);
+    opts.innerHTML=''; choices.forEach(k=>{const b=document.createElement('button');b.innerHTML=shapeSVG(its[k].t,its[k].c);b.onclick=()=>choose(k,b,its);opts.appendChild(b)});
+    hint.textContent='다음엔 뭐가 올까요?';
+  }
+  function choose(k,b,its){
+    if(busy)return; ac();
+    if(k===answer){ busy=true; addScore(); seq.querySelector('.q').outerHTML=shapeSVG(its[k].t,its[k].c);
+      const r=b.getBoundingClientRect(); burst(r.left+r.width/2,r.top+r.height/2); say(`맞아요! ${its[k].n}`); celebrate('무늬 완성! 🌈');
+      setTimeout(()=>{if(cur==='pat')round()},1900);
+    }else{ boop(); b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); say('처음부터 소리 내어 읽어 볼까?'); hint.textContent='손가락으로 짚으면서 읽어 봐요 ☝️'; }
+  }
+  enter.pat=()=>{round(); setTimeout(()=>say('다음엔 뭐가 올까요?'),300)};
+})();
+
+/* ===== 2. 반쪽 칠하기 ===== */
+(()=>{
+  const grid=document.getElementById('grid'), pal=document.getElementById('symPal');
+  const R=5, C=6; let left, right, sel, cols, busy=false;
+  function round(){
+    busy=false; const lv=score; cols=shuffle(Object.values(PCOL)).slice(0,lv<4?2:3);
+    left=[]; for(let r=0;r<R;r++){left.push([]);for(let c=0;c<3;c++)left[r].push(Math.random()<(lv<4?.4:.55)?pick(cols):null)}
+    if(!left.flat().some(Boolean))left[2][2]=cols[0];
+    right=[...Array(R)].map(()=>[null,null,null]); sel=cols[0]; draw();
+  }
+  function draw(){
+    grid.innerHTML='';
+    for(let r=0;r<R;r++)for(let c=0;c<C;c++){
+      const i=document.createElement('i');
+      if(c<3){ if(left[r][c])i.style.background=left[r][c]; }
+      else{ i.className='r'; const v=right[r][c-3]; if(v){i.style.background=v;i.style.borderColor=v;} i.onclick=()=>paint(r,c-3,i); }
+      grid.appendChild(i);
+    }
+    pal.innerHTML='';
+    [...cols,'지우개'].forEach(c=>{const b=document.createElement('button');
+      if(c==='지우개'){b.textContent='🧽';b.style.background='#fff'}else b.style.background=c;
+      b.classList.toggle('sel',c===sel||(c==='지우개'&&sel===null)); b.onclick=()=>{ac();sel=c==='지우개'?null:c;tone(600,.08);draw()}; pal.appendChild(b)});
+  }
+  function paint(r,c,el){
+    if(busy)return; ac(); right[r][c]=right[r][c]===sel?null:sel; tone(sel?520+c*80:300,.12,'triangle',.18);
+    el.style.background=right[r][c]||''; el.style.borderColor=right[r][c]||'';
+    // 거울: 오른쪽 c칸 ↔ 왼쪽 (2-c)칸
+    const ok=left.every((row,ri)=>row.every((v,ci)=>(v||null)===(right[ri][2-ci]||null)));
+    if(ok){ busy=true; addScore(); say('우와, 거울처럼 똑같아요!'); celebrate('🦋 똑같아요!'); setTimeout(()=>{if(cur==='sym')round()},2000); }
+  }
+  enter.sym=()=>{round(); setTimeout(()=>say('왼쪽이랑 똑같이 칠해요. 거울처럼요!'),300)};
+})();
+
+/* ===== 3. 색 꾸미기 ===== */
+(()=>{
+  const svg=document.getElementById('pic'), pal=document.getElementById('colPal'), sets=document.getElementById('sets');
+  const SETS={'봄 동산':['#F7A1B5','#FDE68A','#A7E3A0','#9ED8F5','#C9A7EB','#FFFDF5'],
+    '바닷가':['#0E7490','#38BDF8','#BAE6FD','#FDE68A','#F97316','#FFFFFF'],
+    '숲속':['#14532D','#4D7C0F','#A3E635','#92400E','#FBBF24','#FEF3C7'],
+    '노을':['#7C2D12','#EA580C','#FB923C','#FCD34D','#BE185D','#4C1D95']};
+  const PICS=[
+    {name:'우리 집',svg:`<rect data-r x="0" y="0" width="400" height="205"/><rect data-r x="0" y="205" width="400" height="95"/>
+      <circle data-r cx="335" cy="55" r="32"/><ellipse data-r cx="95" cy="55" rx="48" ry="20"/>
+      <rect data-r x="110" y="135" width="160" height="125"/><polygon data-r points="95,140 190,62 285,140"/>
+      <rect data-r x="172" y="195" width="38" height="65" rx="4"/><rect data-r x="125" y="160" width="36" height="34"/><rect data-r x="222" y="160" width="36" height="34"/>
+      <rect data-r x="318" y="185" width="18" height="75"/><circle data-r cx="327" cy="160" r="40"/>`},
+    {name:'물고기',svg:`<rect data-r x="0" y="0" width="400" height="300"/><path data-r d="M0 300V255Q100 235 200 258T400 250V300Z"/>
+      <path data-r d="M300 150L370 95V205Z"/><ellipse data-r cx="190" cy="150" rx="125" ry="78"/>
+      <path data-r d="M150 74Q190 40 235 78Z"/><path data-r d="M140 80Q160 150 140 222Q122 150 140 80Z"/><path data-r d="M205 74Q228 150 205 226Q185 150 205 74Z"/>
+      <circle data-r cx="100" cy="130" r="17"/><circle cx="96" cy="130" r="7" fill="#222"/>
+      <circle data-r cx="45" cy="80" r="11"/><circle data-r cx="60" cy="45" r="8"/><path data-r d="M330 255Q315 215 335 180Q350 215 340 255Z"/>`}];
+  let set='봄 동산', sel, picIdx=0;
+  function drawPal(){
+    sets.innerHTML=''; Object.keys(SETS).forEach(k=>{const b=document.createElement('button');b.textContent=k;b.classList.toggle('sel',k===set);
+      b.onclick=()=>{ac();set=k;sel=SETS[k][0];tone(700,.08);say(k+' 색이에요');drawPal()};sets.appendChild(b)});
+    pal.innerHTML=''; SETS[set].forEach(c=>{const b=document.createElement('button');b.style.background=c;b.classList.toggle('sel',c===sel);
+      b.onclick=()=>{ac();sel=c;tone(600,.08);drawPal()};pal.appendChild(b)});
+  }
+  function drawPic(){
+    svg.innerHTML=PICS[picIdx].svg; svg.querySelectorAll('[data-r]').forEach((el,i)=>{el.setAttribute('fill','#fff');
+      el.onclick=()=>{ac();el.setAttribute('fill',sel);tone(440+(i%6)*70,.12,'triangle',.18)}});
+  }
+  document.getElementById('picBtn').onclick=()=>{ac();picIdx=(picIdx+1)%PICS.length;drawPic();tone(500,.1);say(PICS[picIdx].name+'를 꾸며요')};
+  document.getElementById('doneBtn').onclick=()=>{ac();addScore();say('멋진 그림이에요! 어떤 색이 제일 좋아?');celebrate('멋진 그림! 🖼️')};
+  enter.col=()=>{sel=SETS[set][0];drawPal();drawPic();setTimeout(()=>say('색 묶음을 고르고, 그림을 눌러 칠해요'),300)};
+})();
+</script>
